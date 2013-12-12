@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 int main(int argc, char * argv[]) {  
-  printf("bircc - under development :p !");
+  printf("bircc - under development :p !\n");
   return 0;
 }
 

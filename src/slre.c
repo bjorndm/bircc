@@ -1,25 +1,26 @@
-// Copyright (c) 2004-2012 Sergey Lyubka <valenok@gmail.com>
-// All rights reserved
-//
-// Modifications and enhancements by <beoran@gmail.com>, 2013.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+/* Copyright (c) 2004-2012 Sergey Lyubka <valenok@gmail.com>
+ All rights reserved
+
+ Modifications and enhancements by <beoran@gmail.com>, 2013.
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+*/
 
 #include <stdio.h>
 #include <assert.h>
@@ -29,22 +30,22 @@
 #include <string.h>
 #include <errno.h>
 
-#include "slre.h"
+#include "chic/slre.h"
 
 #ifdef _WIN32
 #define snprintf _snprintf
 #endif
 
-// Compiled regular expression
+/* Compiled regular expression */
 struct slre {
   unsigned char code[256];
   unsigned char data[256];
   int code_size;
   int data_size;
-  int num_caps;   // Number of bracket pairs
-  int anchored;   // Must match from string start
+  int num_caps;   /* Number of bracket pairs */
+  int anchored;   /* Must match from string start */
   enum slre_option options;
-  int error;      // Error code
+  int error;      /* Error code */
 };
 
 
@@ -56,34 +57,35 @@ enum {
   NONDIGIT, ALPHA, NONALPHA, ALNUM, NONALNUM, BLANK, NONBLANK, XDIGIT, NONXDIGIT
 };
 
-// Commands and operands are all unsigned char (1 byte long). All code offsets
-// are relative to current address, and positive (always point forward). Data
-// offsets are absolute. Commands with operands:
-//
-// BRANCH offset1 offset2
-//  Try to match the code block that follows the BRANCH instruction
-//  (code block ends with END). If no match, try to match code block that
-//  starts at offset1. If either of these match, jump to offset2.
-//
-// EXACT data_offset data_length
-//  Try to match exact string. String is recorded in data section from
-//  data_offset, and has length data_length.
-//
-// OPEN capture_number
-// CLOSE capture_number
-//  If the user have passed 'struct slre_captured' array for captures, OPEN
-//  records the beginning of the matched substring (cap->ptr), CLOSE
-//  sets the length (cap->len) for respective capture_number.
-//
-// STAR code_offset
-// PLUS code_offset
-// QUEST code_offset
-//  *, +, ?, respectively. Try to gobble as much as possible from the
-//  matched buffer while code block that follows these instructions
-//  matches. When the longest possible string is matched,
-//  jump to code_offset
-//
-// STARQ, PLUSQ are non-greedy versions of STAR and PLUS.
+/* Commands and operands are all unsigned char (1 byte long). All code offsets
+ are relative to current address, and positive (always point forward). Data
+ offsets are absolute. Commands with operands:
+
+ BRANCH offset1 offset2
+  Try to match the code block that follows the BRANCH instruction
+  (code block ends with END). If no match, try to match code block that
+  starts at offset1. If either of these match, jump to offset2.
+
+ EXACT data_offset data_length
+  Try to match exact string. String is recorded in data section from
+  data_offset, and has length data_length.
+
+ OPEN capture_number
+ CLOSE capture_number
+  If the user have passed 'struct slre_captured' array for captures, OPEN
+  records the beginning of the matched substring (cap->ptr), CLOSE
+  sets the length (cap->len) for respective capture_number.
+
+ STAR code_offset
+ PLUS code_offset
+ QUEST code_offset
+  *, +, ?, respectively. Try to gobble as much as possible from the
+  matched buffer while code block that follows these instructions
+  matches. When the longest possible string is matched,
+  jump to code_offset
+
+ STARQ, PLUSQ are non-greedy versions of STAR and PLUS.
+*/
 
 static const char *meta_characters      = "|.^$*+?()[\\";
 static const char *message_match        = "Match";
@@ -131,9 +133,6 @@ const char * slre_error(int code) {
 }
 
 
-/*     
-
-*/
 
 static void set_jump_offset(struct slre *r, int pc, int offset) {
   assert(offset < r->code_size);
@@ -214,7 +213,6 @@ static void anyof(struct slre *r, const char **re) {
         emit(r, old_data_size);
         emit(r, r->data_size - old_data_size);
         return;
-        // NOTREACHED
         break;
       case '\\':
         esc = get_escape_char(re);
@@ -279,7 +277,6 @@ static void compile(struct slre *r, const char **re) {
       case '\0':
         (*re)--;
         return;
-        // NOTREACHED
         break;
 
       case '^':
@@ -334,7 +331,6 @@ static void compile(struct slre *r, const char **re) {
           return;
         }
         return;
-        // NOTREACHED
         break;
 
       case '+':
@@ -368,8 +364,10 @@ static void compile(struct slre *r, const char **re) {
     }
 }
 
-// Compile regular expression. If success, 1 is returned.
-// If error, 0 is returned and slre.error_string points to the error message.
+/* 
+  Compile regular expression. If success, 1 is returned.
+ If error, 0 is returned and slre.error_string points to the error message.
+*/
 static int compile2(struct slre *r, const char *re) {
   r->error = 0;
   r->code_size = r->data_size = r->num_caps = r->anchored = 0;
@@ -378,7 +376,7 @@ static int compile2(struct slre *r, const char *re) {
     r->anchored++;
   }
 
-  emit(r, OPEN);  // This will capture what matches full RE
+  emit(r, OPEN);  /* This will capture what matches full RE */
   emit(r, 0);
 
   while (*re != '\0') {
@@ -525,7 +523,7 @@ static int match(const struct slre *r, int pc, const char *s, int len,
 
       case EXACT:
         error = SLRE_ERROR_NO_MATCH;
-        n = r->code[pc + 2];  // String length
+        n = r->code[pc + 2];  /* String length */
         cmp = r->options & SLRE_CASE_INSENSITIVE ? casecmp : memcmp;
         if (n <= len - *ofs && !cmp(s + *ofs, r->data + r->code[pc + 1], n)) {
           (*ofs) += n;
@@ -534,7 +532,7 @@ static int match(const struct slre *r, int pc, const char *s, int len,
         pc += 3;
         break;
 
-      case QUEST:        
+      case QUEST:
         error = SLRE_OK;
         saved_offset = *ofs;
         if (match(r, pc + 2, s, len, ofs, caps, caps_size) != SLRE_OK) {
@@ -691,14 +689,15 @@ static int match(const struct slre *r, int pc, const char *s, int len,
   return error;
 }
 
-// Return 1 if match, 0 if no match.
-// If `captured_substrings' array is not NULL, then it is filled with the
-// values of captured substrings. captured_substrings[0] element is always
-// a full matched substring. The round bracket captures start from
-// captured_substrings[1].
-// It is assumed that the size of captured_substrings array is enough to
-// hold all captures. The caller function must make sure it is! So, the
-// array_size = number_of_round_bracket_pairs + 1
+/* Return 1 if match, 0 if no match.
+ If `captured_substrings' array is not NULL, then it is filled with the
+ values of captured substrings. captured_substrings[0] element is always
+ a full matched substring. The round bracket captures start from
+ captured_substrings[1].
+ It is assumed that the size of captured_substrings array is enough to
+ hold all captures. The caller function must make sure it is! So, the
+ array_size = number_of_round_bracket_pairs + 1
+*/
 static int match2(const struct slre *r, const char *buf, int len,
                           struct slre_captured *caps, int caps_size) {
   int  i, ofs = 0;
@@ -782,7 +781,7 @@ static int capture(const struct slre_captured *caps, int num_caps, va_list ap) {
     /* Callback needs slightly different arguments, only taken once. */
     if (!callback_ok) { 
       type = va_arg(ap, int); 
-      // stop processing captures if the type SLRE_IGNORE is seen. 
+      /* stop processing captures if the type SLRE_IGNORE is seen.  */
       if (type == SLRE_IGNORE) {
         return err;
       }
@@ -833,178 +832,3 @@ int slre_match(enum slre_option options, const char *re,
   return error;
 }
 
-#if defined(SLRE_UNIT_TEST)
-static struct {
-  const char *name;
-  int narg;
-  const char *flags;
-} opcodes[] = {
-  {"END",      0, ""  },  // End of code block or program
-  {"BRANCH",   2, "oo"},  // Alternative operator, "|"
-  {"ANY",      0, ""  },  // Match any character, "."
-  {"EXACT",    2, "d" },  // Match exact string
-  {"ANYOF",    2, "D" },  // Match any from set, "[]"
-  {"ANYBUT",   2, "D" },  // Match any but from set, "[^]"
-  {"OPEN ",    1, "i" },  // Capture start, "("
-  {"CLOSE",    1, "i" },  // Capture end, ")"
-  {"BOL",      0, ""  },  // Beginning of string, "^"
-  {"EOL",      0, ""  },  // End of string, "$"
-  {"STAR",     1, "o" },  // Match zero or more times "*"
-  {"PLUS",     1, "o" },  // Match one or more times, "+"
-  {"STARQ",    1, "o" },  // Non-greedy STAR,  "*?"
-  {"PLUSQ",    1, "o" },  // Non-greedy PLUS, "+?"
-  {"QUEST",    1, "o" },  // Match zero or one time, "?"
-  {"SPACE",    0, ""  },  // Match whitespace, "\s"
-  {"NONSPACE", 0, ""  },  // Match non-space, "\S"
-  {"DIGIT",    0, ""  }   // Match digit, "\d"
-};
-
-static void print_character_set(FILE *fp, const unsigned char *p, int len) {
-  int  i;
-
-  for (i = 0; i < len; i++) {
-    if (i > 0)
-      (void) fputc(',', fp);
-    if (p[i] == 0) {
-      i++;
-      if (p[i] == 0)
-        (void) fprintf(fp, "\\x%02x", p[i]);
-      else
-        (void) fprintf(fp, "%s", opcodes[p[i]].name);
-    } else if (isprint(p[i])) {
-      (void) fputc(p[i], fp);
-    } else {
-      (void) fprintf(fp,"\\x%02x", p[i]);
-    }
-  }
-}
-
-static void dump(const struct slre *r, FILE *fp) {
-  int  i, j, ch, op, pc;
-
-  for (pc = 0; pc < r->code_size; pc++) {
-
-    op = r->code[pc];
-    (void) fprintf(fp, "%3d %s ", pc, opcodes[op].name);
-
-    for (i = 0; opcodes[op].flags[i] != '\0'; i++)
-      switch (opcodes[op].flags[i]) {
-        case 'i':
-          fprintf(fp, "%d ", r->code[pc + 1]);
-          pc++;
-          break;
-        case 'o':
-          fprintf(fp, "%d ", pc + r->code[pc + 1] - i);
-          pc++;
-          break;
-        case 'D':
-          print_character_set(fp, r->data +
-                              r->code[pc + 1], r->code[pc + 2]);
-          pc += 2;
-          break;
-        case 'd':
-          (void) fputc('"', fp);
-          for (j = 0; j < r->code[pc + 2]; j++) {
-            ch = r->data[r->code[pc + 1] + j];
-            if (isprint(ch))
-              fputc(ch, fp);
-            else
-              fprintf(fp,"\\x%02x",ch);
-          }
-          (void) fputc('"', fp);
-          pc += 2;
-          break;
-      }
-
-    fputc('\n', fp);
-  }
-}
-
-
-int main(void) {
-  static const struct { const char *str, *regex, *msg; } tests[] = {
-    {"aa", ".+", NULL},
-    {"aa", ".", NULL},
-    {"", ".", "No match"},
-    {" cc 1234", "c.\\s\\d+", NULL},
-  };
-  char buf[20];
-  int int_value;
-  const char *msg, *str, *re;
-  size_t i;
-
-  char method[10], uri[100];
-  int http_version_minor, http_version_major;
-  const char *error;
-  const char *request = " \tGET /index.html HTTP/1.0\r\n\r\n";
-
-  error = slre_match(0, "^\\s*(GET|POST)\\s+(\\S+)\\s+HTTP/(\\d)\\.(\\d)",
-                     request, strlen(request),
-                     SLRE_STRING,  sizeof(method), method,
-                     SLRE_STRING, sizeof(uri), uri,
-                     SLRE_INT, sizeof(http_version_major), &http_version_major,
-                     SLRE_INT, sizeof(http_version_minor), &http_version_minor);
-
-  if (error != NULL) {
-    printf("Error parsing HTTP request: %s\n", error);
-  } else {
-    printf("Requested URI: %s\n", uri);
-  }
-
-  for (i = 0; i < sizeof(tests) / sizeof(tests[0]); i++) {
-    if ((msg = slre_match(0, tests[i].regex, tests[i].str,
-                          strlen(tests[i].str), NULL)) != tests[i].msg) {
-      printf("Test %zd failed: [%s] [%s] -> [%s]\n", i, tests[i].str,
-             tests[i].regex, msg ? msg : "(null)");
-      return EXIT_FAILURE;
-    }
-  }
-
-  assert(slre_match(0, "a (\\d+)4\\s*(\\S+)", "aa 1234 xy\nz", 12,
-                    SLRE_INT, sizeof(int_value), &int_value,
-                    SLRE_STRING, sizeof(buf), buf) == NULL);
-  assert(int_value == 123);
-  assert(!strcmp(buf, "xy"));
-
-  str = "Hello превед!";
-  re = "^hello (\\S+)";
-  assert(strcmp(error_no_match, slre_match(0, re, str, strlen(str), SLRE_STRING,
-                                           sizeof(buf), buf)) == 0);
-  assert(slre_match(SLRE_CASE_INSENSITIVE, re, str, strlen(str),
-                    SLRE_STRING, sizeof(buf), buf) == NULL);
-  assert(!strcmp(buf, "превед!"));
-
-  assert(strcmp(error_no_match, slre_match(0, "bC", "aBc", 3)) == 0);
-  assert(slre_match(SLRE_CASE_INSENSITIVE, "bC", "aBc", 3) == NULL);
-  assert(slre_match(0, "3?9", "9", 1) == NULL);
-
-  // TODO: fix this!
-  //assert(slre_match(0, "9?9", "9", 1) == NULL);
-
-  {
-    struct slre slre;
-    struct slre_captured caps[10];
-    char a[10], b[10];
-
-    memset(caps, 'x', sizeof(caps));
-    slre.options = 0;
-    assert(compile2(&slre, "(\\d(\\d)?)") == NULL);
-    assert(!strcmp(match2(&slre, "1", 1, caps, 2), "Too many brackets"));
-    assert(match2(&slre, "1", 1, caps, 3) == NULL);
-    assert(slre.num_caps == 2);
-    assert(caps[1].len == 1);
-    assert(caps[2].len == 0);
-    assert(caps[1].ptr[0] == '1');
-
-    a[0] = b[0] = 'x';
-    assert(slre_match(0, "(\\d(\\d)?)", "1", 1,
-                      SLRE_STRING, sizeof(a), a,
-                      SLRE_STRING, sizeof(b), b) == NULL);
-    assert(!strcmp(a, "1"));
-    assert(b[0] == '\0');
-  }
-
-  printf("%s\n", "All tests passed");
-  return EXIT_SUCCESS;
-}
-#endif // SLRE_UNIT_TEST

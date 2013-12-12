@@ -1,30 +1,31 @@
-// Copyright (c) 2004-2012 Sergey Lyubka <valenok@gmail.com>
-// All rights reserved
-//
-// Enhanced and modified by beoran@gmail.com, 2013.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+/* Copyright (c) 2004-2012 Sergey Lyubka <valenok@gmail.com>
+ All rights reserved
+
+ Enhanced and modified by beoran@gmail.com, 2013.
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+*/
 
 #ifndef SLRE_HEADER_DEFINED
 #define SLRE_HEADER_DEFINED
 
-// This is a regular expression library that implements a subset of Perl RE.
+/* This is a regular expression library that implements a subset of Perl RE.
 // Please refer to http://slre.googlecode.com for detailed description.
 //
 // Supported syntax:
@@ -97,8 +98,9 @@
 // If SLRE_IGNORE is passed, then all further captures are ignored.
 //
 // Return:
-//   NULL: string matched and all captures successfully made
-//   non-NULL: in this case, the return value is an error string
+//   0: string matched and all captures successfully made
+//   non-zero: in this case, the return value is an error value from the enum slre_result.
+*/
 
 /* Match options. */
 enum slre_option { 
@@ -112,29 +114,29 @@ enum slre_capture {
 
 /* Captured substring */
 struct slre_captured {
-  const char *ptr;  // Pointer to the substring
-  int len;          // Substring length
+  const char *ptr;  /* Pointer to the substring. */
+  int len;          /* Substring length. */
 };
 
 
 /* Possible results of slre_match. */
 enum slre_result {
   SLRE_OK                       = 0,
-  SLRE_ERROR_NO_MATCH           = 1,      
+  SLRE_ERROR_NO_MATCH           = 1,
   SLRE_ERROR_JUMP_OFFSET        = 2,
-  SLRE_ERROR_CODE_TOO_LONG      = 3,     
+  SLRE_ERROR_CODE_TOO_LONG      = 3,
   SLRE_ERROR_DATA_TOO_LONG      = 4,
-  SLRE_ERROR_NO_PAREN           = 5,      
-  SLRE_ERROR_BAD_PAREN          = 6,     
-  SLRE_ERROR_NO_BRACKET         = 7,    
+  SLRE_ERROR_NO_PAREN           = 5,
+  SLRE_ERROR_BAD_PAREN          = 6,
+  SLRE_ERROR_NO_BRACKET         = 7,
   SLRE_ERROR_TOO_MANY_PAREN     = 8,
-  SLRE_ERROR_INT_FAILED         = 9,  
-  SLRE_ERROR_INT_SIZE           = 10,    
-  SLRE_ERROR_FLOAT_SIZE         = 11,  
+  SLRE_ERROR_INT_FAILED         = 9,
+  SLRE_ERROR_INT_SIZE           = 10,
+  SLRE_ERROR_FLOAT_SIZE         = 11,
   SLRE_ERROR_FLOAT_FAILED       = 12,
-  SLRE_ERROR_STRING_SIZE        = 13, 
+  SLRE_ERROR_STRING_SIZE        = 13,
   SLRE_ERROR_UNKNOWN_TYPE       = 14,
-  SLRE_ERROR_TEXT_TOO_LONG      = 15,    
+  SLRE_ERROR_TEXT_TOO_LONG      = 15,
   SLRE_ERROR_NULL_CAPTURED      = 16,
   SLRE_ERROR_LAST               = 225,
 };
