@@ -20,15 +20,15 @@ set(CMAKE_C_FLAGS "-W -Wall -Wno-unused -Wno-unknown-pragmas -g -std=c89 -ffast-
 endif(CMAKE_COMPILER_IS_GNUCC)
 
 # Set include and lib dirs. 
-include_directories("include")
+include_directories("include" "include/chic")
 
-set(BIRCC_SRC_FILES src/slre.c src/token.c src/cpp.c src/main.c)
+set(BIRCC_SRC_FILES src/chic_inli.c src/memory.c src/bstrlib.c src/bstraux.c src/slre.c src/token.c src/cpp.c src/main.c)
 message(STATUS ${BIRCC_SRC_FILES})
 set_source_files_properties(${BIRCC_SRC_FILES} PROPERTIES LANGUAGE C)
 
-# exe in the bin subdir (first one should work, but doesnt, hmmm...)
-set(RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+# # exe in the bin subdir (first one should work, but doesnt, hmmm...)
+# set(RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 add_executable(bircc ${BIRCC_SRC_FILES})
 
 # enable_testing()

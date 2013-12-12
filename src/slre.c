@@ -134,6 +134,12 @@ const char * slre_error(int code) {
 
 
 
+/* isblank is not part of C89... */
+static int slre_isblank(int c) {
+  return (c == ' ') || (c =='\t'); 
+}
+
+
 static void set_jump_offset(struct slre *r, int pc, int offset) {
   assert(offset < r->code_size);
   if (r->code_size - offset > 0xff) {
@@ -596,7 +602,7 @@ static int match(const struct slre *r, int pc, const char *s, int len,
         break;
         
       case BLANK:
-        MATCH_WITH_FUNCTION(isblank)
+        MATCH_WITH_FUNCTION(slre_isblank)
         break;
         
       case XDIGIT:
@@ -612,7 +618,7 @@ static int match(const struct slre *r, int pc, const char *s, int len,
         break;
         
       case NONBLANK:
-        MATCH_WITH_NEGATE_FUNCTION(isblank)
+        MATCH_WITH_NEGATE_FUNCTION(slre_isblank)
         break;
         
       case NONXDIGIT:
@@ -720,20 +726,27 @@ static int match2(const struct slre *r, const char *buf, int len,
 }
 
 static int capture_float(const struct slre_captured *cap, void *p, size_t len) {
-  const char *fmt;
-  char buf[20];
-
+  double res;
+  double * dp;
+  float   * fp;
+  char   * endptr;
+  
+  /* it's less safe, but more C89 */
+  res = strtod(cap->ptr, &endptr);
+  if (endptr != (cap->ptr + cap->len)) { 
+    return SLRE_ERROR_FLOAT_FAILED;     
+  } 
+  
   switch (len) {
-    case sizeof(float): fmt = "f"; break;
-    case sizeof(double): fmt = "lf"; break;
+    case sizeof(float)  : fp = p; (*fp) = res; break;
+    case sizeof(double): dp = p; (*dp) = res; break;
     default: return SLRE_ERROR_FLOAT_SIZE;
   }
-
-  snprintf(buf, sizeof(buf), "%%%d%s", cap->len, fmt);
-  return sscanf(cap->ptr, buf, p) == 1 ? SLRE_OK : SLRE_ERROR_FLOAT_FAILED;
+  
+  return SLRE_OK;  
 }
 
-static int capture_string(const struct slre_captured *cap, void *p, size_t len) {
+static int capture_string(const struct slre_captured *cap, void *p, size_t len) {  
   if ((int) len <= cap->len) {
     return SLRE_ERROR_STRING_SIZE;
   }
@@ -743,19 +756,25 @@ static int capture_string(const struct slre_captured *cap, void *p, size_t len) 
 }
 
 static int capture_int(const struct slre_captured *cap, void *p, size_t len) {
-  const char *fmt;
-  char buf[20];
-
+  long  res;  
+  char  *endptr;
+  char  *cp;
+  short *sp;  
+  int   *ip;
+  long  *lp; 
+  res = strtol(cap->ptr, &endptr, 10);
+  if (endptr != (cap->ptr + cap->len)) { 
+    return SLRE_ERROR_FLOAT_FAILED;     
+  }
+ 
   switch (len) {
-    case sizeof(char): fmt = "hh"; break;
-    case sizeof(short): fmt = "h"; break;
-    case sizeof(int): fmt = "d"; break;
-    case sizeof(long long int): fmt = "lld"; break;
+    case sizeof(char)  : cp = p; (*cp) = res; break;
+    case sizeof(short) : sp = p; (*sp) = res; break;
+    case sizeof(int)   : ip = p; (*ip) = res; break;    
+    case sizeof(long)  : lp = p; (*lp) = res; break;
     default: return SLRE_ERROR_INT_SIZE;
   }
-
-  snprintf(buf, sizeof(buf), "%%%d%s", cap->len, fmt);
-  return sscanf(cap->ptr, buf, p) == 1 ?  SLRE_OK : SLRE_ERROR_INT_FAILED;
+  return SLRE_ERROR_FLOAT_FAILED;
 }
 
 static int capture_callback(const struct slre_captured *cap, int i, slre_callback *fp, void * extra) {
