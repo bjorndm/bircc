@@ -14,7 +14,7 @@ any supported platform with a simple switch or environment option.
 
 
 
-License: 
+License:
 
 The MIT License (MIT)
 

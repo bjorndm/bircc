@@ -1,7 +1,8 @@
 /* Copyright (c) 2004-2012 Sergey Lyubka <valenok@gmail.com>
  All rights reserved
 
- Modifications and enhancements by <beoran@gmail.com>, 2013.
+ Modifications and enhancements by Bjorn De Meyer 
+ <bjorn.de.meyer@gmail.com>, 2014.
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -111,7 +112,7 @@ static const char *error_null_captured  =  "SLRE_CAPTURED: null captured struct"
 /* Converts an SLRE error code to a string. Returns NULL if unknown error is used. */
 const char * slre_error(int code) { 
   switch(code) { 
-    case SLRE_OK                     : return message_match;
+    case SLRE_OK                        : return message_match;
     case SLRE_ERROR_NO_MATCH            : return error_no_match;
     case SLRE_ERROR_BAD_PAREN           : return error_bad_paren;
     case SLRE_ERROR_CODE_TOO_LONG       : return error_code_too_long;
@@ -188,7 +189,7 @@ static int get_escape_char(const char **re) {
     case 'S':  res = NONSPACE   << 8;  break;
     case 's':  res = SPACE      << 8;  break;
     case 'D':  res = NONDIGIT   << 8;  break;
-    case 'd':  res = DIGIT      << 8;  break;    
+    case 'd':  res = DIGIT      << 8;  break;
     case 'x':  res = XDIGIT     << 8;  break;
     case 'X':  res = NONXDIGIT  << 8;  break;
     case 'a':  res = ALPHA      << 8;  break;
@@ -673,7 +674,6 @@ static int match(const struct slre *r, int pc, const char *s, int len,
 
       case CLOSE:
         if (caps != NULL) {
-          assert(r->code[pc + 1] >= 0);
           assert(r->code[pc + 1] < caps_size);
           caps[r->code[pc + 1]].len = (s + *ofs) -
             caps[r->code[pc + 1]].ptr;
@@ -766,14 +766,20 @@ static int capture_int(const struct slre_captured *cap, void *p, size_t len) {
   if (endptr != (cap->ptr + cap->len)) { 
     return SLRE_ERROR_FLOAT_FAILED;     
   }
- 
-  switch (len) {
-    case sizeof(char)  : cp = p; (*cp) = res; break;
-    case sizeof(short) : sp = p; (*sp) = res; break;
-    case sizeof(int)   : ip = p; (*ip) = res; break;    
-    case sizeof(long)  : lp = p; (*lp) = res; break;
-    default: return SLRE_ERROR_INT_SIZE;
+  
+  /* Cannot use case statement here due to sizeof(long) problems. */
+  if (len ==  sizeof(char) )       {
+    cp = p; (*cp) = res;
+  } else if (len == sizeof(short)) {
+    sp = p; (*sp) = res;
+  } else if (len == sizeof(int))   {
+    ip = p; (*ip) = res;
+  } else if (len == sizeof(long))  {
+    lp = p; (*lp) = res;
+  } else                           {
+    return SLRE_ERROR_INT_SIZE;
   }
+  
   return SLRE_ERROR_FLOAT_FAILED;
 }
 

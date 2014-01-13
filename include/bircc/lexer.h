@@ -11,7 +11,7 @@ typedef struct bircc_lexer_tokenlist_struct bircc_lexer_tokenlist;
 
 typedef int bircc_lexer_destroy_func(bircc_lexer_value * me);
 typedef int bircc_lexer_lex_func(bircc_lexer_value * me, bircc_lexer_token * token);
-
+/***
 
 /* Generic interface (COM-like) */
 typedef void * bircc_interface_release_func(void * me);
