@@ -22,7 +22,7 @@ endif(CMAKE_COMPILER_IS_GNUCC)
 # Set include and lib dirs. 
 include_directories("include" "include/chic")
 
-set(BIRCC_SRC_FILES src/chic_inli.c src/memory.c src/bstrlib.c src/bstraux.c src/slre.c src/token.c src/cpp.c src/main.c)
+set(BIRCC_SRC_FILES src/chic_inli.c src/memory.c src/pool.c src/bstrlib.c src/bstraux.c src/slre.c src/token.c src/cpp.c src/main.c)
 message(STATUS ${BIRCC_SRC_FILES})
 set_source_files_properties(${BIRCC_SRC_FILES} PROPERTIES LANGUAGE C)
 

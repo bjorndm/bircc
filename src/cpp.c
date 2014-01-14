@@ -101,7 +101,15 @@ bircc_sourcefile * bircc_sourcefile_free(bircc_sourcefile * me) {
     bdestroy(me->text);
     me->text = NULL;
   }  
-  return BIRCC_STRUCT_ALLOC(bircc_sourcefile);
+  bircc_free(me);
+  return NULL;
+}
+
+int bircc_sourcefile_debugprint(bircc_sourcefile * me) {
+  if (!me)       return -1;
+  if (!me->text) return -2;
+  printf("Source file : %s Contents:\n%s\n", me->filename->data, me->text->data);
+  return 0;
 }
 
 
@@ -114,16 +122,22 @@ size_t bircc_bNread(void *buff, size_t elsize, size_t nelem, void *param) {
 
 bircc_sourcefile * bircc_sourcefile_read(const char * filename) {
   bircc_sourcefile * me;
-  if (!filename) return NULL;
+  printf("File name: %s\n", filename);
+  if (!filename)      return NULL;
   me = bircc_sourcefile_alloc(filename);
-  if (!me) return NULL;
+  if (!me)            return NULL;
   me->filename = bfromcstr(filename);
-  if (!me->filename) return me;
+  if (!me->filename)  return bircc_sourcefile_free(me);
+  
   me->file     = fopen(filename, "rt");
-  if (!me->file) return me;
-  me->text = bfromcstr("");
-  if(breada(me->text, bircc_bNread, me->file)) {
+  if (!me->file)      return bircc_sourcefile_free(me);
+  me->text = bread(bircc_bNread, me->file);
+  if(!me->text) {
+    printf("Read error!\n");
     /** Handle read error here... :p */
+  } else {
+      printf("Read file !\n");
+      bircc_sourcefile_debugprint(me);
   }
   return me;
 }
@@ -165,12 +179,6 @@ int bircc_sourcefile_expand_trigraphs(bircc_sourcefile * me) {
   return 0;
 }
 
-int bircc_sourcefile_debugprint(bircc_sourcefile * me) {
-  if (!me)       return -1;
-  if (!me->text) return -2;
-  printf("Source file : %s Contents:\n%s\n", me->filename->data, me->text->data);
-  return 0;
-}
 
 
 

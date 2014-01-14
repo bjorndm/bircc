@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 
+#include "bircc/pool.h"
+
 #include "bircc/cpp.h"
 
 
@@ -10,9 +12,19 @@
 
 int main(int argc, char * argv[]) {  
   int res;
+  int index;
+  void * ptr[10];
   bircc_sourcefile * src = NULL;
+  struct bircc_pool * pool = NULL;
   printf("bircc - under development :p !\n");
-  src = bircc_sourcefile_read("/home/bjorn/src/bircc/test/test_cpp_1.h");
+  
+  pool = bircc_pool_make();
+  for(index = 0; index < 10 ; index ++) {
+    ptr[index] = bircc_pool_calloc(pool, index * 10);
+  }
+  bircc_pool_free(pool);
+  
+  src = bircc_sourcefile_read("test/data/test_cpp_1.h");
   if(!src) {
     puts("Out of memory");
     return 1;
