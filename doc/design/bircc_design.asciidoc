@@ -17,6 +17,8 @@ These are the planned features of Bircc in random order.
   . Bircc supports some of it's own extensions to the standards.
   . Bircc supports GNU extensions to the standards to the point of being
     able to compile a Linux kernel.
+  . Bircc supports extension of other C compilers in as far as they are
+    needed to interface with 
   . Bircc provides extensive debugging information if requested.
   . Bircc provides extensive diagnostics.
   . Bircc supports many target architectures.
@@ -25,18 +27,22 @@ These are the planned features of Bircc in random order.
   . Bircc supports the x86 architecture as a target architecture.
   . Bircc supports the i64 architecture as a target architecture.
   . Bircc supports the arm architecture as a target architecture.
+  . Bircc may support other host architectures.
   . Bircc supports Linux as a target platform.
   . Bircc supports the Android as a target platform.
   . Bircc supports the Windows as a target platform.
   . Bircc supports the OS X as a target platform.
   . Bircc supports the iOS as a target platform.
   . Bircc supports compiling to a ``bare metal'' target platform.
+  . Bircc may support other target platforms.
   . Supports many host architectures.
   . Bircc supports the x86 architecture as a host architecture.
   . Bircc supports the i64 architecture as a host architecture.
+  . Bircc may support other host architectures.
   . Bircc supports Linux as a host platform.
   . Bircc supports the Windows as a host platform.
   . Bircc supports the OS X as a host platform.
+  . Bircc may support other host platforms.
   . Bircc allows easy cross compiling. The compiler has back ends for all
     supported target architectures and platforms on all supported host
     architectures and platforms.
@@ -45,6 +51,12 @@ These are the planned features of Bircc in random order.
   . The individual passes of the compiler are each reusable.
   . For better diagnostics and parsing, the preprocessor will be integrated
     in Bircc.
+  . Bircc is documented with hand-written asciidoc documentation to help
+    it's reusability and ease of use.
+  . Bircc code is written keeping the goal of being reusable in mind.
+  . Bircc follows the idea of convention over configuration, 
+    but is configurable for the cases where convention is insufficient.
+
 
 Architecture
 ------------
@@ -54,53 +66,58 @@ Data Flow
 
 Bircc is an ANSI C compiler, that performs the following operations in order:
 
-1. Parse the command line and environment options and set up the data thus 
-found into a compilation environment. Construct a list of files that 
-have to be processed, and what has to be done with them.
+  1. Parse the command line and environment options and set up the data thus 
+  found into a compilation environment. Construct a list of files that 
+  have to be processed, and what has to be done with them.
 
-2. From this list of files, for each file perform the needed operation. 
-Let's assume that full compilation is required, other cases can be handled
-by stopping halfway or calling by the linker, etc.
+  2. From this list of files, for each file perform the needed operation. 
+  Let's assume that full compilation is required, other cases can be handled
+  by stopping halfway or calling by the linker, etc.
 
-3. To compile a C file, first read it in completely. This requires more memory 
-than line per line processing, but on contemporary systems this should be the
-fastest approach. This sets up source data.
+  3. To compile a C file, first read it in completely. This requires more
+  memory than line per line processing, but on contemporary systems this
+  should be the fastest approach. This sets up source data.
 
-4. Trigraph replacement. Trigraphs are replaced by a simple search and replace 
-in the source data.
+  4. Trigraph replacement. Trigraphs are replaced by a simple search and
+  replace in the source data.
 
-5. Preprocessing. First, the preprocesor lexer tokenizes the source file, and produces a token list. The token list is then passed to the preprocessor parser
-that parses the preprocessed data into a preprocessing AST. Finally the 
-preprocessor interpreter is run on the preprocessor AST and any #included files 
-are recursively handled starting from steps 3. to step 5. The result is a preprocessing AST that fully represents the "compilation unit" of the C program.
-This AST is the collapsed into a token list again.
+  5. Preprocessing. First, the preprocesor lexer tokenizes the source file,
+  and produces a token list. The token list is then passed to the
+  preprocessor parser that parses the preprocessed data into a preprocessing
+  AST. Finally the preprocessor interpreter is run on the preprocessor AST
+  and any #included files are recursively handled starting from steps 3. to
+  step 5. The result is a preprocessing AST that fully represents the
+  "compilation unit" of the C program. This AST is the collapsed into a
+  token list again.
 
-6. C lexing. The C lexer walks over the preprocessed token list, and further 
-splits up and changes the type of the preprocessing tokens to C tokens. The 
-result is a C token list.
+  6. C lexing. The C lexer walks over the preprocessed token list, and
+  further splits up and changes the type of the preprocessing tokens to C
+  tokens. The result is a C token list.
+  
+  7. C parsing. The C parser walks the C token list and constructs a C AST.
+  
+  8. Optional first optimization pass. The C optimizer walks the C AST and 
+  removes any redundant statements, etc.
+  
+  9. Intermediate Representation Generation. An intermediate representation 
+  or IR is generated for use by the back end. This IR is a list (XXX or a
+  tree???) of simple statements, much like a virtual assembler, but already
+  parsed. The IR could be generated by another front-end language that 
+  isn't C.
 
-7. C parsing. The C parser walks the C token list and constructs a C AST.
+  10. Optional IR optimization step. Peephole optimizations, etc can 
+  happen here.
+  
+  11. The IR is passed to the selected back end. This could be an 
+  external assembler, or an internal code generator.
+  
+  12. If an internal code generator is used, it transforms the IR into 
+  machine code in the desired binary file format lay-out (ELF, PE, etc).
 
-8. Optional first optimization pass. The C optimizer walks the C AST and 
-removes any redundant statements, etc.
+  13. The binary file(s) generated by the code generator are written out to
+  the desired name and location.
 
-9. Intermediate Representation Generation. An intermediate representation or IR 
-is generated for use by the back end. This IR is a list (XXX or a tree???) of 
-simple statements, much like a virtual assembler, but already parsed. The IR 
-could be generated by another front-end language that isn't C.
-
-10. Optional IR optimization step. Peephole optimizations, etc can happen here.
-
-11. The IR is passed to the selected back end. This could be an 
-external assembler, or an internal code generator.
-
-12. If an internal code generator is used, it transforms the IR into 
-machine code in the desired binary file format lay-out (ELF, PE, etc).
-
-13. The binary file(s) generated by the code generator are written out to the 
-desired name and location.
-
-14. Steps 2 though 13 are repeated for every file that needs compilation.
+  14. Steps 2 though 13 are repeated for every file that needs compilation.
 
 
 Components
