@@ -5,6 +5,47 @@ Bircc Architecture And Design
 :Date: 2014-01-13
 :Revision: 0.1.0
 
+Features
+--------
+
+These are the planned features of Bircc in random order.
+
+  . Bircc is an ANSI C compiler.
+  . Bircc supports the ANSI C89 standard.
+  . Bircc supports the ANSI C99 standard.
+  . Bircc supports the ANSI C11 standard.
+  . Bircc supports some of it's own extensions to the standards.
+  . Bircc supports GNU extensions to the standards to the point of being
+    able to compile a Linux kernel.
+  . Bircc provides extensive debugging information if requested.
+  . Bircc provides extensive diagnostics.
+  . Bircc supports many target architectures.
+  . Bircc supports many target platforms across every supported 
+    target architecture.
+  . Bircc supports the x86 architecture as a target architecture.
+  . Bircc supports the i64 architecture as a target architecture.
+  . Bircc supports the arm architecture as a target architecture.
+  . Bircc supports Linux as a target platform.
+  . Bircc supports the Android as a target platform.
+  . Bircc supports the Windows as a target platform.
+  . Bircc supports the OS X as a target platform.
+  . Bircc supports the iOS as a target platform.
+  . Bircc supports compiling to a ``bare metal'' target platform.
+  . Supports many host architectures.
+  . Bircc supports the x86 architecture as a host architecture.
+  . Bircc supports the i64 architecture as a host architecture.
+  . Bircc supports Linux as a host platform.
+  . Bircc supports the Windows as a host platform.
+  . Bircc supports the OS X as a host platform.
+  . Bircc allows easy cross compiling. The compiler has back ends for all
+    supported target architectures and platforms on all supported host
+    architectures and platforms.
+  . Bircc is easy to reuse.
+  . Bircc is reusable though a library libbircc.
+  . The individual passes of the compiler are each reusable.
+  . For better diagnostics and parsing, the preprocessor will be integrated
+    in Bircc.
+
 Architecture
 ------------
 
@@ -82,9 +123,6 @@ Components
 15. IR Optimizer
 16. Code Generator
 17. Output File
-
-
-
 
 
 
