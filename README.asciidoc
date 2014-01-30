@@ -1,9 +1,13 @@
+BIRCC
+=====
+
+== Introduction
 
 bircc is an ANSI C compiler under development written in plain C. It has
 the explicit goal of being reusable in other projects.
 
 
-Goals:
+== Goals
 
 * Easy to reuse, provide bircc.h interface and libbircc library.
 * The best possible C programming experience. Be as helpful as possible to
@@ -12,9 +16,18 @@ Goals:
 need to compile a cross-compiler, the compiler can compile to binaries for
 any supported platform with a simple switch or environment option.
 
+== Implemented Features
+  * Trigraphs. Ho hum.
 
+== Building
 
-License:
+* Bircc requires the CLAD library at http://github.com/bjorndm/clad.
+  Compile and install that first.
+
+* Bircc uses cmake build system for now, until it becomes self-hosting.
+  So just say cmake ; make
+  
+== License
 
 The MIT License (MIT)
 
